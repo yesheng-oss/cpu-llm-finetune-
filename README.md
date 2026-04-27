@@ -1,6 +1,6 @@
 # CPU LLM Fine-tuning
 
-一个轻量级的 LLM 微调项目，专为 CPU 设计，适合初学者。
+一个轻量级的 LLM 微调项目，专为 CPU 设计。
 
 ## 环境要求
 
