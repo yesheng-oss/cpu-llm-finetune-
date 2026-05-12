@@ -148,7 +148,8 @@ def main():
     trainer.train()
 
     print("Saving model...")
-    trainer.save_model(args.output_dir)
+    model = model.merge_and_unload()
+    model.save_pretrained(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
     print(f"Model saved to: {args.output_dir}")
 

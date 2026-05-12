@@ -15,7 +15,7 @@ def download_model():
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
         trust_remote_code=True,
-        torch_dtype=torch.float32
+        dtype=torch.float32
     )
     
     print(f"Saving to: {OUTPUT_DIR}")

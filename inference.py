@@ -1,7 +1,6 @@
 import argparse
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel
 
 
 def load_model(model_path: str):
@@ -14,13 +13,12 @@ def load_model(model_path: str):
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    base_model = AutoModelForCausalLM.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         model_path,
         trust_remote_code=True,
         torch_dtype=torch.float32,
         device_map="cpu",
     )
-    model = PeftModel.from_pretrained(base_model, model_path)
     model.eval()
 
     return model, tokenizer
@@ -56,6 +54,8 @@ def generate(
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     if "Output:" in response:
         response = response.split("Output:")[-1].strip()
+    if "\nInstruction:" in response:
+        response = response.split("\nInstruction:")[0].strip()
     return response
 
 
@@ -77,10 +77,20 @@ def chat(model, tokenizer):
 def main():
     parser = argparse.ArgumentParser(description="Inference with fine-tuned model")
     parser.add_argument("--model_path", type=str, default="./output", help="Model path")
+    parser.add_argument("--instruction", type=str, default=None, help="Single instruction (non-interactive mode)")
+    parser.add_argument("--input_text", type=str, default="", help="Input for the instruction")
     args = parser.parse_args()
 
     model, tokenizer = load_model(args.model_path)
-    chat(model, tokenizer)
+
+    if args.instruction:
+        response = generate(model, tokenizer, args.instruction, args.input_text)
+        print(f"\nInstruction: {args.instruction}")
+        if args.input_text:
+            print(f"Input: {args.input_text}")
+        print(f"Output: {response}\n")
+    else:
+        chat(model, tokenizer)
 
 
 if __name__ == "__main__":
